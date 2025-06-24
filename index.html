@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -50,7 +51,27 @@
             font-size: 15px;
             text-align: center;
             background-color: rgba(0, 0, 0, 0);
-            cursor: text;
+            cursor: pointer;
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 1px solid #ddd;
+            width: 200px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+        }
+        .dropdown-menu div {
+            padding: 8px;
+            cursor: pointer;
+        }
+        .dropdown-menu div:hover {
+            background-color: #f0f0f0;
         }
     </style>
 </head>
@@ -68,7 +89,17 @@
     </div>
     <div class="image-container">
         <img src="4.jpg" alt="证件图片4">
-        <div class="text-overlay" id="editableText" ondblclick="makeEditable()">秦忆荣府北区</div>
+        <div class="text-overlay" id="editableText">山水如画府</div>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <div>山水如画府</div>
+            <div>秦忆荣府北区</div>
+            <div>秦忆荣府南区</div>
+            <div>望钰和府北区</div>
+            <div>望钰和府南区</div>
+            <div>万达同心湾北区</div>
+            <div>万达同心湾南区</div>
+            <div>碧桂园铂玺湾</div>
+        </div>
     </div>
     <div class="image-container">
         <img src="5.jpg" alt="证件图片5">
@@ -77,28 +108,52 @@
     <script>
         function updateTime() {
             const now = new Date();
-            // 24小时制时分秒
             const timeStr = now.toLocaleTimeString('zh-CN', {hour12: false});
             document.getElementById('currentTime').textContent = timeStr;
             
-            // 年月日
             const dateStr = now.toLocaleDateString('zh-CN', {year: 'numeric', month: 'long', day: 'numeric'});
             document.getElementById('currentDate').textContent = dateStr;
             
             setTimeout(updateTime, 1000);
         }
         
-        function makeEditable() {
-            const textElement = document.getElementById('editableText');
-            const currentText = textElement.textContent;
-            textElement.innerHTML = `<input type="text" value="${currentText}" style="font-size:15px;text-align:center;background:transparent;border:none;color:black;" onblur="saveText(this)">`;
-            textElement.querySelector('input').focus();
-        }
+        const editableText = document.getElementById('editableText');
+        const dropdownMenu = document.getElementById('dropdownMenu');
         
-        function saveText(input) {
-            const textElement = document.getElementById('editableText');
-            textElement.textContent = input.value;
-        }
+        // 双击编辑功能
+        editableText.ondblclick = function(e) {
+            e.stopPropagation();
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = this.textContent;
+            input.style.cssText = 'font-size:15px;text-align:center;background:transparent;border:none;color:black;width:100%;';
+            this.innerHTML = '';
+            this.appendChild(input);
+            input.focus();
+            
+            input.onblur = function() {
+                editableText.textContent = this.value;
+            };
+        };
+        
+        // 单击显示下拉菜单
+        editableText.onclick = function(e) {
+            e.stopPropagation();
+            dropdownMenu.style.display = 'block';
+        };
+        
+        // 下拉菜单选择
+        dropdownMenu.querySelectorAll('div').forEach(item => {
+            item.onclick = function() {
+                editableText.textContent = this.textContent;
+                dropdownMenu.style.display = 'none';
+            };
+        });
+        
+        // 点击其他地方关闭下拉菜单
+        document.addEventListener('click', function() {
+            dropdownMenu.style.display = 'none';
+        });
         
         // 初始化时间
         updateTime();
